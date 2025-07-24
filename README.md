@@ -56,7 +56,19 @@ After installation, you can launch Waydroid in two ways:
     ```bash
     start-waydroid
     ```
+### Troubleshooting
 
+**"Launcher icon does not appear in the menu"**
+*   After running the installer, your desktop environment might need to refresh its application menu. The most reliable way to do this is to **log out and log back in**.
+
+**"Command not found: start-waydroid" (in terminal)**
+*   The installer creates a command link in `~/.local/bin/`. For your terminal to find it, this directory must be in your system's `PATH`. Most modern Linux distributions configure this automatically on login. If the command is not found after logging out and back in, you may need to manually add the following lines to your shell's configuration file (e.g., `~/.bashrc` or `~/.zshrc`):
+    ```bash
+    if [ -d "$HOME/.local/bin" ] ; then
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+    ```
+    
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
