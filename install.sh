@@ -30,10 +30,6 @@ fi
 LAUNCHER_PATH="$INSTALL_DIR/start-waydroid.sh"
 DESKTOP_FILE_PATH="$APP_DIR/waydroid-launcher.desktop"
 
-# This command terminal clouse
-LAUNCHER_PATH="$INSTALL_DIR/start-waydroid.sh"
-DESKTOP_FILE_PATH="$APP_DIR/waydroid-launcher.desktop"
-
 echo "4. Creating application menu launcher..."
 cat > "$DESKTOP_FILE_PATH" << EOL
 [Desktop Entry]
