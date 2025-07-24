@@ -30,10 +30,12 @@ Running Waydroid on a standard X11 desktop can be tricky. The Wayland environmen
 
 ### Installation
 
-1.  Download the latest release ZIP file or clone the repository:
-    ```bash
-    git clone https://github.com/iskierek100/waydroid-x11-launcher.git
-    ```
+1.  Download the project files. You can do this in two ways:
+    *   **As a ZIP file:** Click the green `< > Code` button on this page, then select `Download ZIP`. Unzip the file after downloading.
+    *   **Or using Git (for advanced users):**
+        ```bash
+        git clone https://github.com/Iskierek100/waydroid-x11-launcher.git
+        ```
 2.  Navigate into the project directory:
     ```bash
     cd waydroid-x11-launcher
