@@ -20,7 +20,7 @@ Running Waydroid on a standard X11 desktop can be tricky. The Wayland environmen
     *   **Fullscreen:** True immersive fullscreen mode with no panels or borders.
     *   **Windowed:** A standard portrait-mode window, perfect for most apps.
     *   **Custom Size:** Launch in a window of any size you define.
-*   **Bidirectional Clipboard Sync:** Seamlessly copy and paste text between your desktop (X11) and Waydroid (Wayland). *(This feature is experimental and may cause issues on some desktop environments like KDE Plasma).*
+*   **Bidirectional Clipboard Sync:** Seamlessly copy and paste text between your desktop (X11) and Waydroid (Wayland). *(Warning: This feature may be unstable on some desktop environments like KDE Plasma).*
 *   **Clean Session Management:** The script ensures that all processes are started and stopped cleanly.
 
 ---
@@ -32,12 +32,12 @@ Before you can use the launcher, you must manually install the required dependen
 **Required commands:** `zenity`, `weston`, `wmctrl`, `xclip`, `wl-clipboard`.
 
 #### Installation instructions for common distributions:
-For Debian / Ubuntu / Mint:
+
+**For Debian / Ubuntu / Mint:**
 ```bash
 sudo apt update
 sudo apt install zenity weston wmctrl xclip wl-clipboard
 ```
-(Note: qdbus is part of the qttools5-dev-tools package)
 For Arch Linux / Manjaro:
 ```bash
 sudo pacman -Syu zenity weston wmctrl xclip wl-clipboard
@@ -46,7 +46,6 @@ For Fedora:
 ```bash
 sudo dnf install zenity weston wmctrl xclip wl-clipboard
 ```
-(Note: On older Fedora versions, you might need qt5-qttools-devel)
 ---
 ### Installation
 1. Download the project files. You can do this in two ways:
