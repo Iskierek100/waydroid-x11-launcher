@@ -40,7 +40,7 @@ Running Waydroid on a standard X11 desktop can be tricky. The Wayland environmen
     ```bash
     cd waydroid-x11-launcher
     ```
-3.  Make the installer executable and run it:
+3.  Make the installer executable and run it. The script will check for dependencies and may ask for your password (`sudo`) to install them.
     ```bash
     chmod +x install.sh
     ./install.sh
