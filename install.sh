@@ -19,8 +19,12 @@ cp "$SOURCE_DIR/start-waydroid.sh" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/waydroid-clipboard-sync.sh" "$INSTALL_DIR/"
 
 echo "3. Setting execute permissions..."
-chmod +x "$INSTALL_DIR/start-waydroid.sh"
-chmod +x "$INSTALL_DIR/waydroid-clipboard-sync.sh"
+if chmod +x "$INSTALL_DIR/start-waydroid.sh" && chmod +x "$INSTALL_DIR/waydroid-clipboard-sync.sh"; then
+    echo "Permissions set successfully."
+else
+    echo "ERROR: Failed to set execute permissions."
+    echo "Please run 'chmod +x $INSTALL_DIR/start-waydroid.sh' manually."
+fi
 
 # 4. Create the .desktop launcher
 LAUNCHER_PATH="$INSTALL_DIR/start-waydroid.sh"
