@@ -29,22 +29,22 @@ Running Waydroid on a standard X11 desktop can be tricky. The Wayland environmen
 
 Before you can use the launcher, you must manually install the required dependencies using your distribution's package manager.
 
-**Required commands:** `zenity`, `weston`, `wmctrl`, `xclip`, `wl-clipboard`, `qdbus`.
+**Required commands:** `zenity`, `weston`, `wmctrl`, `xclip`, `wl-clipboard`.
 
 #### Installation instructions for common distributions:
 For Debian / Ubuntu / Mint:
 ```bash
 sudo apt update
-sudo apt install zenity weston wmctrl xclip wl-clipboard qttools5-dev-tools
+sudo apt install zenity weston wmctrl xclip wl-clipboard
 ```
 (Note: qdbus is part of the qttools5-dev-tools package)
 For Arch Linux / Manjaro:
 ```bash
-sudo pacman -Syu zenity weston wmctrl xclip wl-clipboard qt5-tools
+sudo pacman -Syu zenity weston wmctrl xclip wl-clipboard
 ```
 For Fedora:
 ```bash
-sudo dnf install zenity weston wmctrl xclip wl-clipboard qt5-qttools
+sudo dnf install zenity weston wmctrl xclip wl-clipboard
 ```
 (Note: On older Fedora versions, you might need qt5-qttools-devel)
 ---
