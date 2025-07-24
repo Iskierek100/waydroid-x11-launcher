@@ -1,12 +1,9 @@
-# waydroid-x11-launcher
-A user-friendly launcher for running Waydroid in fullscreen or windowed mode on X11, with automatic dependency installation and clipboard sync.
-
 # Waydroid Universal X11 Launcher
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Works on: Linux](https://img.shields.io/badge/Works%20on-Linux-blue.svg)
 
-A simple yet powerful script to run Waydroid seamlessly on any X11 desktop environment. It provides a user-friendly graphical menu to launch Waydroid in fullscreen, windowed, or custom-sized modes, handling all the complex setup in the background.
+A simple yet powerful script to run Waydroid seamlessly on any X11 desktop environment. It provides a user-friendly graphical menu to launch Waydroid in fullscreen, windowed, or custom-sized modes.
 
 This project was envisioned and co-developed by **iskierek** and an AI assistant.
 
@@ -14,7 +11,7 @@ This project was envisioned and co-developed by **iskierek** and an AI assistant
 
 ### The Problem it Solves
 
-Running Waydroid on a standard X11 desktop can be tricky. The Wayland environment used by Waydroid is isolated from the main X11 session, which leads to issues like a broken clipboard (copy/paste doesn't work) and difficulties in managing the application window. This launcher solves these problems with a single, easy-to-use script.
+Running Waydroid on a standard X11 desktop can be tricky. The Wayland environment used by Waydroid is isolated from the main X11 session, which can lead to issues with window management and a broken clipboard. This launcher solves these problems with a single, easy-to-use script.
 
 ### Features
 
@@ -23,51 +20,23 @@ Running Waydroid on a standard X11 desktop can be tricky. The Wayland environmen
     *   **Fullscreen:** True immersive fullscreen mode with no panels or borders.
     *   **Windowed:** A standard portrait-mode window, perfect for most apps.
     *   **Custom Size:** Launch in a window of any size you define.
-*   **Automatic Dependency Installation:** The script checks for required tools (`Weston`, `wmctrl`, etc.) and offers to install them for you.
-*   **Bidirectional Clipboard Sync:** Seamlessly copy and paste text between your desktop (X11) and Waydroid (Wayland).
-*   **Clean Session Management:** The script ensures that all processes are started and stopped cleanly, leaving no mess behind.
-*   **Easy Installation:** A simple one-command installer sets everything up for you.
+*   **Bidirectional Clipboard Sync:** Seamlessly copy and paste text between your desktop (X11) and Waydroid (Wayland). *(This feature is experimental and may cause issues on some desktop environments like KDE Plasma).*
+*   **Clean Session Management:** The script ensures that all processes are started and stopped cleanly.
 
-### Installation
+---
 
-1.  Download the project files. You can do this in two ways:
-    *   **As a ZIP file:** Click the green `< > Code` button on this page, then select `Download ZIP`. Unzip the file after downloading.
-    *   **Or using Git (for advanced users):**
-        ```bash
-        git clone https://github.com/Iskierek100/waydroid-x11-launcher.git
-        ```
-2.  Navigate into the project directory:
-    ```bash
-    cd waydroid-x11-launcher
-    ```
-3.  Make the installer executable and run it. The script will check for dependencies and may ask for your password (`sudo`) to install them.
-    ```bash
-    chmod +x install.sh
-    ./install.sh
-    ```
-4.  That's it! The installer will copy the necessary files and create a launcher in your application menu.
+### Dependencies
 
-### Usage
+Before you can use the launcher, you must manually install the required dependencies using your distribution's package manager.
 
-After installation, you can launch Waydroid in two ways:
+**Required commands:** `zenity`, `weston`, `wmctrl`, `xclip`, `wl-clipboard`, `qdbus`.
 
-1.  **From your Application Menu:** Look for "Waydroid Launcher" and click it.
-2.  **From your Terminal:** Simply type the command:
-    ```bash
-    start-waydroid
-    ```
-### Troubleshooting
+#### Installation instructions for common distributions:
 
-**"Launcher icon does not appear in the menu"**
-*   After running the installer, your desktop environment might need to refresh its application menu. The most reliable way to do this is to **log out and log back in**.
-
-**"Command not found: start-waydroid" (in terminal)**
-*   The installer creates a command link in `~/.local/bin/`. For your terminal to find it, this directory must be in your system's `PATH`. Most modern Linux distributions configure this automatically on login. If the command is not found after logging out and back in, you may need to manually add the following lines to your shell's configuration file (e.g., `~/.bashrc` or `~/.zshrc`):
-    ```bash
-    if [ -d "$HOME/.local/bin" ] ; then
-        export PATH="$HOME/.local/bin:$PATH"
-    fi
-    ```
+**For Debian / Ubuntu / Mint:**
+```bash
+sudo apt update
+sudo apt install zenity weston wmctrl xclip wl-clipboard qttools5-dev-tools
     
 ### License
 
