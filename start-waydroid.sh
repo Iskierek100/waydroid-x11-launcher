@@ -58,7 +58,7 @@ MODE=$(zenity --list \
   "Fullscreen" "Runs in a borderless, fullscreen window." \
   "Windowed" "Runs in a standard portrait window (600x1000)." \
   "Custom Window" "Runs in a window with a custom size." \
-  --height=280 --width=550)
+  --height=350 --width=550)
 
 if [ -z "$MODE" ]; then echo "Cancelled by user."; exit 0; fi
 
