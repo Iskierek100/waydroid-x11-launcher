@@ -30,8 +30,9 @@ fi
 LAUNCHER_PATH="$INSTALL_DIR/start-waydroid.sh"
 DESKTOP_FILE_PATH="$APP_DIR/waydroid-launcher.desktop"
 
-# This command ensures the terminal stays open after the script finishes
-COMMAND_TO_RUN="bash -c '\"$LAUNCHER_PATH\"; echo -e \"\n--- Script Finished --- \nPress Enter to close this window.\"; read'"
+# This command terminal clouse
+LAUNCHER_PATH="$INSTALL_DIR/start-waydroid.sh"
+DESKTOP_FILE_PATH="$APP_DIR/waydroid-launcher.desktop"
 
 echo "4. Creating application menu launcher..."
 cat > "$DESKTOP_FILE_PATH" << EOL
@@ -39,7 +40,7 @@ cat > "$DESKTOP_FILE_PATH" << EOL
 Version=1.0
 Name=Waydroid Launcher
 Comment=Launches Waydroid with a graphical selection menu
-Exec=$COMMAND_TO_RUN
+Exec=$LAUNCHER_PATH
 Icon=waydroid
 Terminal=true
 Type=Application
