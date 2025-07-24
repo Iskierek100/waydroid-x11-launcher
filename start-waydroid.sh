@@ -1,54 +1,36 @@
 #!/bin/bash
-# Final Version: Stable clipboard sync, robust dependency checks.
+# Wersja ostateczna - Tylko sprawdza zależności i uruchamia program.
 
-# --- Step 0: Find its sibling script ---
+# --- Krok 1: Sprawdzenie, czy wszystko jest na miejscu ---
+REQUIRED_CMDS=("zenity" "weston" "wmctrl" "xclip" "wl-copy")
+MISSING_CMDS=()
+for cmd in "${REQUIRED_CMDS[@]}"; do
+    if ! command -v "$cmd" &> /dev/null; then
+        MISSING_CMDS+=("$cmd")
+    fi
+done
+
+# Jeśli czegoś brakuje, wyświetl JEDEN, zbiorczy komunikat i zakończ.
+if [ ${#MISSING_CMDS[@]} -ne 0 ]; then
+    # Użyjemy zenity do wyświetlenia błędu, jeśli jest dostępne
+    ERROR_MSG="CRITICAL ERROR: Dependencies missing!\n\nThe launcher cannot start because the following commands are missing:\n\n -> ${MISSING_CMDS[*]}\n\nPlease install them according to the README.md instructions and try again."
+
+    if command -v zenity &> /dev/null; then
+        zenity --error --text="$ERROR_MSG" --width=400
+    else
+        echo -e "$ERROR_MSG"
+        read -p "Press Enter to exit."
+    fi
+    exit 1
+fi
+
+# --- Jeśli doszliśmy tutaj, to znaczy, że wszystko jest zainstalowane. ---
+
+# Krok 2: Znajdź swoje rodzeństwo
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SYNC_SCRIPT_PATH="$SCRIPT_DIR/waydroid-clipboard-sync.sh"
 
-# --- Step 1: Dependency Check Function ---
-check_deps() {
-    declare -A deps=(
-        ["zenity"]="zenity" ["weston"]="weston" ["wmctrl"]="wmctrl"
-        ["xclip"]="xclip" ["wl-copy"]="wl-clipboard"
-    )
-    local missing_pkgs=()
-    echo "--- Checking dependencies ---"
-    for cmd in "${!deps[@]}"; do
-        if ! command -v "$cmd" &> /dev/null; then
-            missing_pkgs+=("${deps[$cmd]}")
-        fi
-    done
-
-    if [ ${#missing_pkgs[@]} -ne 0 ]; then
-        echo "WARNING: The following packages are missing: ${missing_pkgs[*]}"
-        read -p "Install them now? (y/n) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            if ! sudo apt-get update && sudo apt-get install -y "${missing_pkgs[@]}"; then
-                echo "ERROR: Installation failed. Aborting."
-                exit 1
-            fi
-            # Final check after installation attempt
-            for pkg_cmd in "${!deps[@]}"; do
-                if [[ " ${missing_pkgs[*]} " =~ " ${deps[$pkg_cmd]} " ]]; then
-                    if ! command -v "$pkg_cmd" &> /dev/null; then
-                        echo "CRITICAL ERROR: Package '${deps[$pkg_cmd]}' failed to install properly."
-                        echo "Please try installing it manually: sudo apt install ${deps[$pkg_cmd]}"
-                        exit 1
-                    fi
-                fi
-            done
-            echo "Dependencies installed successfully."
-        else
-            echo "Cancelled. The script cannot continue."
-            exit 1
-        fi
-    else
-        echo "All dependencies are satisfied."
-    fi
-}
-
-# --- Step 2: Cleanup Function ---
+# Krok 3: Funkcja sprzątająca
 cleanup() {
     echo "Exit signal received, cleaning up..."
     if [[ -n "$SYNC_PID" && $(ps -p $SYNC_PID > /dev/null) ]]; then kill -9 $SYNC_PID; fi
@@ -61,10 +43,8 @@ cleanup() {
 trap cleanup EXIT
 
 # ==============================================================================
-# --- MAIN PROGRAM LOGIC ---
+# --- GŁÓWNA LOGIKA PROGRAMU ---
 # ==============================================================================
-
-check_deps
 
 MODE=$(zenity --list \
   --title="Select Waydroid Launch Mode" \
