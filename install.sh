@@ -9,48 +9,50 @@ APP_DIR="$HOME/.local/share/applications"
 echo "Universal Waydroid Launcher Installer by iskierek & AI"
 echo "-------------------------------------------------------------"
 
-# Step 1: Create target directories if they don't exist
+# Step 1: Create target directories
 echo "Creating target directories..."
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$BIN_DIR"
 mkdir -p "$APP_DIR"
 
-# Step 2: Copy the main script files
+# Step 2: Copy the script files
 echo "Copying script files to $INSTALL_DIR..."
 cp ./start-waydroid.sh "$INSTALL_DIR/"
 cp ./waydroid-clipboard-sync.sh "$INSTALL_DIR/"
-
-# Make sure they are executable
 chmod +x "$INSTALL_DIR/start-waydroid.sh"
 chmod +x "$INSTALL_DIR/waydroid-clipboard-sync.sh"
 echo "Script files copied."
 
-# Step 3: Create a "command" in the system
-# We create a symbolic link so the user can type 'start-waydroid' in the terminal
+# Step 3: Create a system command (optional, for terminal users)
 echo "Creating system command in $BIN_DIR..."
-# Remove old link if it exists
 rm -f "$BIN_DIR/start-waydroid"
 ln -s "$INSTALL_DIR/start-waydroid.sh" "$BIN_DIR/start-waydroid"
-echo "Command 'start-waydroid' created."
-echo "Please ensure that the directory $BIN_DIR is in your PATH."
-echo "(In most modern systems, it is by default)."
+echo "Command 'start-waydroid' created (for terminal use)."
 
-# Step 4: Create the .desktop file (Application Menu Launcher)
+# =========================================================================
+# === STEP 4 (THE ULTIMATE FIX) ===
+# We create the .desktop file with the FULL, ABSOLUTE path.
+# This bypasses any PATH issues and works on all desktop environments.
+# =========================================================================
 echo "Creating launcher in the applications menu..."
+# Build the full path to the script
+FULL_SCRIPT_PATH="$INSTALL_DIR/start-waydroid.sh"
+
 cat > "$APP_DIR/waydroid-launcher.desktop" << EOL
 [Desktop Entry]
 Version=1.0
 Name=Waydroid Launcher
 Comment=Run Waydroid in fullscreen or windowed mode
-Exec=start-waydroid
+Exec=$FULL_SCRIPT_PATH
 Icon=waydroid
 Terminal=false
 Type=Application
 Categories=Game;System;
 EOL
 echo "Launcher 'Waydroid Launcher' created in your applications menu."
+echo "It uses an absolute path, so it should work immediately."
 
 echo "-------------------------------------------------------------"
 echo "Installation completed successfully!"
-echo "A new icon 'Waydroid Launcher' should now be available in your application menu."
-echo "You can drag it to your desktop or panel."
+echo "A new icon 'Waydroid Launcher' should now be in your application menu."
+echo "You may need to log out and log back in for the menu to refresh."
