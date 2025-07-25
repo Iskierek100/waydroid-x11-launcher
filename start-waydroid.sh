@@ -1,47 +1,34 @@
 #!/bin/bash
-# Final Version - Checks for dependencies and informs the user. Does not auto-install.
+# Final Hybrid Version - Combines the stable "On-Demand" clipboard with the reliable "Symlink Hack" launcher.
+# Co-developed by iskierek and an AI assistant.
 
-# --- Step 0: Find its sibling script ---
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-SYNC_SCRIPT_PATH="$SCRIPT_DIR/waydroid-clipboard-sync.sh"
-
-# --- Step 1: Dependency Check Function (Informational Only) ---
-check_deps() {
-    # This is the definitive list of required commands
-    REQUIRED_CMDS=("zenity" "weston" "wmctrl" "xclip" "wl-copy")
-    MISSING_CMDS=()
-    echo "--- Checking for required commands ---"
-    for cmd in "${REQUIRED_CMDS[@]}"; do
-        if ! command -v "$cmd" &> /dev/null; then
-            MISSING_CMDS+=("$cmd")
-        fi
-    done
-
-    # If anything is missing, display ONE clear error message and exit.
-    if [ ${#MISSING_CMDS[@]} -ne 0 ]; then
-        ERROR_MSG="CRITICAL ERROR: Dependencies missing!\n\nThe launcher cannot start because the following commands are missing:\n\n -> ${MISSING_CMDS[*]}\n\nPlease install them according to the README.md instructions and try again."
-
-        # Try to use zenity to show a graphical error, fallback to echo
-        if command -v zenity &> /dev/null; then
-            zenity --error --text="$ERROR_MSG" --width=450
-        else
-            echo -e "\n$ERROR_MSG\n"
-        fi
-        # Wait for user confirmation before exiting the terminal
-        read -p "Press Enter to exit."
-        exit 1
+# --- Dependency Check (informational only) ---
+# We check for all dependencies for the launcher and its helpers here for a better user experience.
+REQUIRED_CMDS=("zenity" "weston" "wmctrl" "xclip" "wl-copy" "wl-paste")
+MISSING_CMDS=()
+for cmd in "${REQUIRED_CMDS[@]}"; do
+    if ! command -v "$cmd" &> /dev/null; then
+        MISSING_CMDS+=("$cmd")
     fi
-    echo "All dependencies are satisfied."
-}
+done
 
-# --- Step 2: Cleanup Function ---
+if [ ${#MISSING_CMDS[@]} -ne 0 ]; then
+    ERROR_MSG="CRITICAL ERROR: Dependencies missing for the launcher!\n\nMissing commands:\n -> ${MISSING_CMDS[*]}\n\nPlease run the installer again or install them manually and try again."
+    zenity --error --text="$ERROR_MSG" --width=450
+    exit 1
+fi
+
+# --- Cleanup Function ---
 cleanup() {
     echo "Exit signal received, cleaning up..."
-    if [[ -n "$SYNC_PID" && $(ps -p $SYNC_PID > /dev/null) ]]; then kill -9 $SYNC_PID; fi
+    # Kill Weston process if it's still running
     if [[ -n "$WESTON_PID" && $(ps -p $WESTON_PID > /dev/null) ]]; then kill -9 $WESTON_PID; fi
-    # Clean up the symlink
-    rm -f "$XDG_RUNTIME_DIR/wayland-0"
+    # Stop Waydroid session
     waydroid session stop &> /dev/null
+    # Remove the temporary socket file (our "note in a bottle")
+    rm -f /tmp/current_waydroid_socket
+    # CRITICAL: Remove the symlink we created
+    rm -f "$XDG_RUNTIME_DIR/wayland-0"
     echo "Cleanup complete."
 }
 trap cleanup EXIT
@@ -50,19 +37,17 @@ trap cleanup EXIT
 # --- MAIN PROGRAM LOGIC ---
 # ==============================================================================
 
-check_deps
-
 MODE=$(zenity --list \
   --title="Select Waydroid Launch Mode" \
   --column="Mode" --column="Description" \
   "Fullscreen" "Runs in a borderless, fullscreen window." \
   "Windowed" "Runs in a standard portrait window (600x1000)." \
   "Custom Window" "Runs in a window with a custom size." \
-  --height=350 --width=550)
+  --height=280 --width=550)
 
 if [ -z "$MODE" ]; then echo "Cancelled by user."; exit 0; fi
 
-# Base Weston command, without --socket
+# Base Weston command, we DO NOT specify socket name here.
 weston_cmd=("weston" "--backend=x11-backend.so")
 
 case "$MODE" in
@@ -95,41 +80,50 @@ case "$MODE" in
     ;;
 esac
 
+# Append the config file to the command
 weston_cmd+=("--config=$CONFIG_FILE")
 
 # --- Startup Logic ---
 waydroid session stop &> /dev/null
+# Clean up potential leftovers from a previous failed session
+rm -f "$XDG_RUNTIME_DIR/wayland-0"
 sleep 1
 echo -e "$WESTON_CONFIG" > "$CONFIG_FILE"
 
-echo "Launching Weston with options: ${weston_cmd[*]}"
+# Launch Weston in the background
 "${weston_cmd[@]}" &
 WESTON_PID=$!
-sleep 3
+sleep 2 # Give Weston a moment to create its socket
 
-# --- THE SYMLINK HACK ---
+# --- THE SYMLINK HACK (Restored & Integrated) ---
+# Find the real socket file Weston created (the newest one)
 REAL_SOCKET_FILE=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -type s -name "wayland-*" -printf "%T@ %p\n" | sort -n | tail -1 | cut -d' ' -f2-)
+
 if [ -z "$REAL_SOCKET_FILE" ]; then
     echo "CRITICAL ERROR: Failed to find the Wayland socket created by Weston."
+    zenity --error --text="Failed to start Weston correctly. Could not find its Wayland socket."
     exit 1
 fi
+# Get just the filename
 REAL_SOCKET_NAME=$(basename "$REAL_SOCKET_FILE")
+# The name Waydroid always expects
 WAYDROID_EXPECTED_SOCKET="$XDG_RUNTIME_DIR/wayland-0"
+# Create the link to trick Waydroid
 ln -sf "$REAL_SOCKET_NAME" "$WAYDROID_EXPECTED_SOCKET"
+echo "Weston is running on socket: $REAL_SOCKET_NAME, linked to wayland-0"
 # --- END OF HACK ---
 
-if [ -f "$SYNC_SCRIPT_PATH" ]; then
-    "$SYNC_SCRIPT_PATH" "$REAL_SOCKET_NAME" &
-    SYNC_PID=$!
-else
-    echo "WARNING: Clipboard sync script not found."
-fi
+# --- "Note in a Bottle" for our helper scripts ---
+# Now we write the REAL socket name for our clipboard scripts to use.
+echo "$REAL_SOCKET_NAME" > /tmp/current_waydroid_socket
 
+# Manage fullscreen window if needed
 if [ "$MANAGE_WINDOW" = true ]; then
     timeout 15 bash -c 'while ! /usr/bin/wmctrl -l | grep -q "Weston Compositor"; do sleep 0.5; done'
     /usr/bin/wmctrl -r "Weston Compositor" -b add,fullscreen
 fi
 
+# Finally, launch the Waydroid UI
 waydroid show-full-ui &
 
 echo "Waydroid ($MODE) is ready. Waiting for Weston to close..."
