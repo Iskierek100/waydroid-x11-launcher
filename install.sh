@@ -3,7 +3,7 @@
 # Copies scripts, creates launcher, and configures global keyboard shortcuts for KDE/GNOME.
 
 # List of required commands
-REQUIRED_CMDS=(zenity weston wmctrl xclip wl-clipboard xdotool)
+REQUIRED_CMDS=(zenity weston wmctrl xclip wl-copy wl-paste xdotool)
 
 MISSING_CMDS=()
 for cmd in "${REQUIRED_CMDS[@]}"; do
