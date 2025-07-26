@@ -154,10 +154,14 @@ If your custom keyboard shortcuts do not work immediately, or you see a conflict
 3. Check configuration files:
    If problems persist, check the following files for duplicate or conflicting shortcuts:
 
-* ~/.config/khotkeysrc
-* ~/.config/kglobalshortcutsrc
+```bash
+~/.config/khotkeysrc
+~/.config/kglobalshortcutsrc
+```
    You can search for your key combination with:
-   grep -i "Meta+Alt+V" ~/.config/kglobalshortcutsrc
+```bash   
+grep -i "Meta+Alt+V" ~/.config/kglobalshortcutsrc
+```
 
 4. Re-add your shortcuts:
    If shortcuts still do not work, delete them and add them again in System Settings → Shortcuts → Custom Shortcuts.
