@@ -171,8 +171,6 @@ chmod +x ~/.local/share/waydroid-launcher/paste_to_waydroid.sh
 chmod +x ~/.local/share/waydroid-launcher/paste_to_x11.sh
 ```
 
- **Note:**
-
 ⚠️ After making changes to shortcuts, a full system restart is often required for KDE Plasma to fully refresh its shortcut configuration.
 
 ---
