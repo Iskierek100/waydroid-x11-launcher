@@ -164,8 +164,9 @@ If your custom keyboard shortcuts do not work immediately, or you see a conflict
    Click Apply after each change.
 
 5. Make sure your scripts are executable:
-   ***Run:***
-   ```bash
+***RUN:***
+   
+```bash
 chmod +x ~/.local/share/waydroid-launcher/paste_to_waydroid.sh
 chmod +x ~/.local/share/waydroid-launcher/paste_to_x11.sh
 ```
