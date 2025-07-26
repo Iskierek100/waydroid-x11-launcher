@@ -8,17 +8,14 @@ A simple yet powerful script to run Waydroid seamlessly on any X11 desktop envir
 This project was envisioned and co-developed by **iskierek** and an AI assistant.
 
 ---
-
 ### Features
 
-Features
 * User-Friendly GUI Menu: Select your launch mode with a simple click.
 * Multiple Launch Modes: Fullscreen, standard window, or custom-sized window.
 * On-Demand Clipboard Sync: Uses keyboard shortcuts to sync the clipboard, avoiding background loops that cause instability on some systems (like KDE Plasma). This is the most stable method.
 * Clean Session Management: Automatically starts and stops all related processes.
 
 ---
-
 ### Dependencies
 
 ⚠️ **Before using the launcher, you must manually install the required packages.**
@@ -175,6 +172,7 @@ chmod +x ~/.local/share/waydroid-launcher/paste_to_x11.sh
 ```
 
  **Note:**
+
 ⚠️ After making changes to shortcuts, a full system restart is often required for KDE Plasma to fully refresh its shortcut configuration.
 
 ---
