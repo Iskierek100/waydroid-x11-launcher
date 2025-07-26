@@ -133,12 +133,47 @@ How to use the clipboard:
 * If you get a "command not found" error, check the path to your script.
 * You can always edit or remove shortcuts from this menu.
 
+
 ---
 ### Troubleshooting
 "Launcher icon does not appear in the menu"
 * After running the installer, your desktop environment might need to refresh its application menu. The most reliable way to do this is to log out and log back in.
----
 
+---
+### ⚠️ Troubleshooting keyboard shortcuts in KDE Plasma
+If your custom keyboard shortcuts do not work immediately, or you see a conflict warning, try the following steps:
+
+1. Check for conflicts:
+   If you see a message about a shortcut conflict, make sure the same key combination is not used elsewhere in your system.
+   Remove or change any duplicate shortcuts in System Settings → Shortcuts → Custom Shortcuts or Global Shortcuts.
+
+2. Restart your computer:
+   Sometimes, KDE Plasma keeps "ghost" shortcuts in memory even after you remove or change them.
+   A full system restart will clear these and allow your new shortcuts to work.
+
+3. Check configuration files:
+   If problems persist, check the following files for duplicate or conflicting shortcuts:
+
+* ~/.config/khotkeysrc
+* ~/.config/kglobalshortcutsrc
+   You can search for your key combination with:
+   grep -i "Meta+Alt+V" ~/.config/kglobalshortcutsrc
+
+4. Re-add your shortcuts:
+   If shortcuts still do not work, delete them and add them again in System Settings → Shortcuts → Custom Shortcuts.
+   Click Apply after each change.
+
+5. Make sure your scripts are executable:
+   ***Run:***
+   ```bash
+chmod +x ~/.local/share/waydroid-launcher/paste_to_waydroid.sh
+chmod +x ~/.local/share/waydroid-launcher/paste_to_x11.sh
+```
+
+ ***Note:***
+⚠️  After making changes to shortcuts, a full system restart is often required for KDE Plasma to fully refresh its shortcut configuration.
+
+---
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
