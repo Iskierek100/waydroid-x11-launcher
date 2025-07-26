@@ -28,7 +28,7 @@ Features
 
 #### Installation instructions for common distributions:
 
-**For Debian / Ubuntu / Mint:**
+For Debian / Ubuntu / Mint:
 ```bash
 sudo apt update
 sudo apt install zenity weston wmctrl xclip wl-clipboard xdotool
@@ -169,14 +169,13 @@ grep -i "Meta+Alt+V" ~/.config/kglobalshortcutsrc
 
 5. Make sure your scripts are executable:
 ***RUN:***
-   
 ```bash
 chmod +x ~/.local/share/waydroid-launcher/paste_to_waydroid.sh
 chmod +x ~/.local/share/waydroid-launcher/paste_to_x11.sh
 ```
 
  ***Note:***
-⚠️  After making changes to shortcuts, a full system restart is often required for KDE Plasma to fully refresh its shortcut configuration.
+##⚠️  After making changes to shortcuts, a full system restart is often required for KDE Plasma to fully refresh its shortcut configuration.
 
 ---
 ### License
