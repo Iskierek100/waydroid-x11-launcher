@@ -1,10 +1,8 @@
 #!/bin/bash
-# Final Hybrid Version - Combines the stable "On-Demand" clipboard with the reliable "Symlink Hack" launcher.
-# Co-developed by iskierek and an AI assistant.
+# Waydroid Launcher - clean socket version
 
-# --- Dependency Check (informational only) ---
-# We check for all dependencies for the launcher and its helpers here for a better user experience.
-REQUIRED_CMDS=("zenity" "weston" "wmctrl" "xclip" "wl-copy" "wl-paste")
+# --- Dependency Check ---
+REQUIRED_CMDS=("zenity" "weston" "wmctrl" "xclip" "wl-copy" "wl-paste" "waydroid" "xdotool")
 MISSING_CMDS=()
 for cmd in "${REQUIRED_CMDS[@]}"; do
     if ! command -v "$cmd" &> /dev/null; then
@@ -13,42 +11,38 @@ for cmd in "${REQUIRED_CMDS[@]}"; do
 done
 
 if [ ${#MISSING_CMDS[@]} -ne 0 ]; then
-    ERROR_MSG="CRITICAL ERROR: Dependencies missing for the launcher!\n\nMissing commands:\n -> ${MISSING_CMDS[*]}\n\nPlease run the installer again or install them manually and try again."
-    zenity --error --text="$ERROR_MSG" --width=450
+    ERROR_MSG="CRITICAL ERROR: Missing programs:\n\n -> ${MISSING_CMDS[*]}\n\nPlease install them and run again."
+    zenity --error --text="$ERROR_MSG" --width=400
     exit 1
 fi
 
 # --- Cleanup Function ---
 cleanup() {
-    echo "Exit signal received, cleaning up..."
-    # Kill Weston process if it's still running
-    if [[ -n "$WESTON_PID" && $(ps -p $WESTON_PID > /dev/null) ]]; then kill -9 $WESTON_PID; fi
-    # Stop Waydroid session
-    waydroid session stop &> /dev/null
-    # Remove the temporary socket file (our "note in a bottle")
+    echo "Cleaning up..."
+    if [[ -n "$WESTON_PID" ]] && kill -0 "$WESTON_PID" 2>/dev/null; then
+        kill -9 "$WESTON_PID"
+    fi
+    waydroid session stop &>/dev/null
     rm -f /tmp/current_waydroid_socket
-    # CRITICAL: Remove the symlink we created
-    rm -f "$XDG_RUNTIME_DIR/wayland-0"
     echo "Cleanup complete."
 }
 trap cleanup EXIT
 
-# ==============================================================================
-# --- MAIN PROGRAM LOGIC ---
-# ==============================================================================
-
+# --- Select launch mode ---
 MODE=$(zenity --list \
   --title="Select Waydroid Launch Mode" \
   --column="Mode" --column="Description" \
   "Fullscreen" "Runs in a borderless, fullscreen window." \
-  "Windowed" "Runs in a standard portrait window (600x1000)." \
-  "Custom Window" "Runs in a window with a custom size." \
+  "Windowed" "Runs in a 600x1000 window." \
+  "Custom Window" "Runs in a custom-sized window." \
   --height=350 --width=600)
 
-if [ -z "$MODE" ]; then echo "Cancelled by user."; exit 0; fi
+if [ -z "$MODE" ]; then echo "Cancelled."; exit 0; fi
 
-# Base Weston command, we DO NOT specify socket name here.
-weston_cmd=("weston" "--backend=x11-backend.so")
+# --- Common Weston settings ---
+WAYLAND_SOCKET_NAME="wayland-wd"
+weston_cmd=("weston" "--socket=$WAYLAND_SOCKET_NAME" "--backend=x11-backend.so")
+CONFIG_FILE=""
 
 case "$MODE" in
   "Fullscreen")
@@ -63,8 +57,7 @@ case "$MODE" in
     CONFIG_FILE="$HOME/.config/weston-windowed.ini"
     ;;
   "Custom Window")
-    SIZE=$(zenity --entry \
-      --title="Enter Window Size" \
+    SIZE=$(zenity --entry --title="Enter Window Size" \
       --text="Enter width and height separated by a space (e.g., 800 600):" \
       --entry-text="800 600")
     if [ -z "$SIZE" ]; then echo "Cancelled."; exit 0; fi
@@ -80,51 +73,31 @@ case "$MODE" in
     ;;
 esac
 
-# Append the config file to the command
+echo -e "$WESTON_CONFIG" > "$CONFIG_FILE"
 weston_cmd+=("--config=$CONFIG_FILE")
 
-# --- Startup Logic ---
-waydroid session stop &> /dev/null
-# Clean up potential leftovers from a previous failed session
-rm -f "$XDG_RUNTIME_DIR/wayland-0"
+# --- Stop leftovers ---
+waydroid session stop &>/dev/null
 sleep 1
-echo -e "$WESTON_CONFIG" > "$CONFIG_FILE"
 
-# Launch Weston in the background
+# --- Start Weston ---
 "${weston_cmd[@]}" &
 WESTON_PID=$!
-sleep 2 # Give Weston a moment to create its socket
+sleep 2
 
-# --- THE SYMLINK HACK (Restored & Integrated) ---
-# Find the real socket file Weston created (the newest one)
-REAL_SOCKET_FILE=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -type s -name "wayland-*" -printf "%T@ %p\n" | sort -n | tail -1 | cut -d' ' -f2-)
+# Save socket name for clipboard helpers
+echo "$WAYLAND_SOCKET_NAME" > /tmp/current_waydroid_socket
 
-if [ -z "$REAL_SOCKET_FILE" ]; then
-    echo "CRITICAL ERROR: Failed to find the Wayland socket created by Weston."
-    zenity --error --text="Failed to start Weston correctly. Could not find its Wayland socket."
-    exit 1
-fi
-# Get just the filename
-REAL_SOCKET_NAME=$(basename "$REAL_SOCKET_FILE")
-# The name Waydroid always expects
-WAYDROID_EXPECTED_SOCKET="$XDG_RUNTIME_DIR/wayland-0"
-# Create the link to trick Waydroid
-ln -sf "$REAL_SOCKET_NAME" "$WAYDROID_EXPECTED_SOCKET"
-echo "Weston is running on socket: $REAL_SOCKET_NAME, linked to wayland-0"
-# --- END OF HACK ---
-
-# --- "Note in a Bottle" for our helper scripts ---
-# Now we write the REAL socket name for our clipboard scripts to use.
-echo "$REAL_SOCKET_NAME" > /tmp/current_waydroid_socket
-
-# Manage fullscreen window if needed
+# --- Manage fullscreen ---
 if [ "$MANAGE_WINDOW" = true ]; then
-    timeout 15 bash -c 'while ! /usr/bin/wmctrl -l | grep -q "Weston Compositor"; do sleep 0.5; done'
-    /usr/bin/wmctrl -r "Weston Compositor" -b add,fullscreen
+    timeout 15 bash -c 'while ! wmctrl -l | grep -q "Weston Compositor"; do sleep 0.5; done'
+    wmctrl -r "Weston Compositor" -b add,fullscreen
 fi
 
-# Finally, launch the Waydroid UI
-waydroid show-full-ui &
+# --- Start Waydroid on same socket ---
+WAYLAND_DISPLAY=$WAYLAND_SOCKET_NAME waydroid session start &
+sleep 2
+WAYLAND_DISPLAY=$WAYLAND_SOCKET_NAME waydroid show-full-ui &
 
-echo "Waydroid ($MODE) is ready. Waiting for Weston to close..."
+echo "Waydroid running on socket: $WAYLAND_SOCKET_NAME"
 wait $WESTON_PID
